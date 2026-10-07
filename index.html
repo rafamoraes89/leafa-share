@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Resultado - Leafa Dados</title>
+    <style>
+        :root { --primary: #00ff37; }
+        body.premium-theme { --primary: #ffb347; background: linear-gradient(rgba(40,10,10,0.8), rgba(27,17,15,0.9)), url('https://i.imgur.com/your-dragon-bg.jpg'); }
+        body:not(.premium-theme) { background: linear-gradient(rgba(14,24,83,0.8), rgba(29,29,90,0.9)), url('https://i.imgur.com/your-arcane-bg.jpg'); }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .box { 
+            background: rgba(26, 26, 46, 0.95); width: 100%; max-width: 350px; padding: 30px; 
+            border-radius: 25px; border: 2px solid var(--primary); box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center;
+        }
+        body.premium-theme .box { background: rgba(43, 29, 26, 0.95); }
+        
+        .titulo { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        .total { font-size: 5rem; font-weight: 900; color: white; text-shadow: 0 0 20px var(--primary); margin: 10px 0; line-height: 1; }
+        .buff { font-size: 1rem; font-weight: 900; margin-bottom: 25px; padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--primary); }
+        
+        .hist-titulo { text-align: left; font-size: 0.75rem; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .hist-item { background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; text-align: left; border-left: 3px solid var(--primary); }
+        
+        .btn-loja { 
+            display: block; width: 100%; padding: 15px; margin-top: 20px; border-radius: 15px; 
+            background: linear-gradient(135deg, var(--primary), #00cc2c); color: #000; font-weight: 900; 
+            text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        body.premium-theme .btn-loja { background: linear-gradient(135deg, var(--primary), #e67e22); }
+    </style>
+</head>
+<body>
+
+    <div class="box" id="resultadoBox" style="display: none;">
+        <div class="titulo">Seu amigo tirou:</div>
+        <div id="resTotal" class="total">0</div>
+        <div id="resBuff" class="buff">⚖️ Rolagem Neutra</div>
+        
+        <div class="hist-titulo">Últimas Rolagens:</div>
+        <div id="resHist"></div>
+
+        <!-- Coloque o link real do seu app na Play Store aqui -->
+        <a href="https://play.google.com/store/apps/details?id=com.rafaelmoraes.leafadicerpg" class="btn-loja">BAIXAR O APP</a>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashShare = urlParams.get('share');
+
+        if (hashShare) {
+            try {
+                // Descriptografa os dados
+                const data = JSON.parse(decodeURIComponent(atob(hashShare)));
+                
+                // Aplica o tema
+                if (data.th === 'premium') document.body.classList.add('premium-theme');
+                
+                // Preenche os dados
+                document.getElementById('resTotal').innerText = data.t;
+                
+                const buffEl = document.getElementById('resBuff');
+                if (data.b > 0) {
+                    buffEl.innerHTML = `🔮 Bênção de Leafa (${data.b}x)`;
+                    buffEl.style.color = '#7CFC00';
+                } else if (data.m > 0) {
+                    buffEl.innerHTML = `💀 Maldição de Leafa (${data.m}x)`;
+                    buffEl.style.color = '#c084fc';
+                    buffEl.style.borderColor = '#c084fc';
+                }
+
+                const histContainer = document.getElementById('resHist');
+                if (data.h && data.h.length > 0) {
+                    histContainer.innerHTML = data.h.map(item => `<div class="hist-item">${item}</div>`).join('');
+                } else {
+                    histContainer.innerHTML = `<div style="opacity:0.5; font-size:0.8rem; text-align:center;">Sem histórico</div>`;
+                }
+
+                // Mostra a caixa
+                document.getElementById('resultadoBox').style.display = 'block';
+            } catch (e) {
+                document.body.innerHTML = "<h3 style='text-align:center;'>Link inválido ou corrompido.</h3>";
+            }
+        } else {
+            document.body.innerHTML = "<h3 style='text-align:center;'>Nenhum resultado encontrado.</h3>";
+        }
+    </script>
+</body>
+</html>
