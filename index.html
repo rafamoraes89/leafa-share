@@ -20,7 +20,10 @@
         
         .titulo { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
         .total { font-size: 5rem; font-weight: 900; color: white; text-shadow: 0 0 20px var(--primary); margin: 10px 0; line-height: 1; }
-        .buff { font-size: 1rem; font-weight: 900; margin-bottom: 25px; padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--primary); }
+        .buff { font-size: 1rem; font-weight: 900; margin-bottom: 15px; padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--primary); }
+        
+        .configs-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 25px; text-align: left; font-size: 0.85rem; border: 1px dashed rgba(255,255,255,0.2); line-height: 1.6; }
+        .configs-box span { display: block; }
         
         .hist-titulo { text-align: left; font-size: 0.75rem; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
         .hist-item { background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; text-align: left; border-left: 3px solid var(--primary); }
@@ -38,12 +41,16 @@
     <div class="box" id="resultadoBox" style="display: none;">
         <div class="titulo">Seu amigo tirou:</div>
         <div id="resTotal" class="total">0</div>
-        <div id="resBuff" class="buff">⚖️ Rolagem Neutra</div>
+        
+        <!-- O que aconteceu na rolagem -->
+        <div id="resBuff" class="buff">⚖️ Nenhum Buff Ativado</div>
+        
+        <!-- Configurações que estavam no App -->
+        <div id="resConfigs" class="configs-box" style="display: none;"></div>
         
         <div class="hist-titulo">Últimas Rolagens:</div>
         <div id="resHist"></div>
 
-        <!-- Coloque o link real do seu app na Play Store aqui -->
         <a href="https://play.google.com/store/apps/details?id=com.rafaelmoraes.leafadicerpg" class="btn-loja">BAIXAR O APP</a>
     </div>
 
@@ -59,19 +66,36 @@
                 // Aplica o tema
                 if (data.th === 'premium') document.body.classList.add('premium-theme');
                 
-                // Preenche os dados
+                // Preenche o total
                 document.getElementById('resTotal').innerText = data.t;
                 
+                // 1. O que ativou na rolagem?
                 const buffEl = document.getElementById('resBuff');
                 if (data.b > 0) {
-                    buffEl.innerHTML = `🔮 Bênção de Leafa (${data.b}x)`;
+                    buffEl.innerHTML = `🔮 Ativou Bênção (${data.b}x)`;
                     buffEl.style.color = '#7CFC00';
                 } else if (data.m > 0) {
-                    buffEl.innerHTML = `💀 Maldição de Leafa (${data.m}x)`;
+                    buffEl.innerHTML = `💀 Sofreu Maldição (${data.m}x)`;
                     buffEl.style.color = '#c084fc';
                     buffEl.style.borderColor = '#c084fc';
+                } else {
+                    buffEl.style.opacity = '0.7';
                 }
 
+                // 2. Quais eram as configurações (porcentagens)?
+                let configHtml = [];
+                if (data.pb > 0) configHtml.push(`<span>🔮 Chance de Bênção: <b style="color:#7CFC00;">${data.pb}%</b></span>`);
+                else if (data.pb < 0) configHtml.push(`<span>💀 Chance de Maldição: <b style="color:#c084fc;">${data.pb}%</b></span>`);
+                
+                if (data.pr > 0) configHtml.push(`<span>🎲 Chance de Reroll: <b style="color:var(--primary);">${data.pr}%</b></span>`);
+
+                const configBox = document.getElementById('resConfigs');
+                if (configHtml.length > 0) {
+                    configBox.innerHTML = `<div style="font-weight:bold; margin-bottom:5px; font-size:0.75rem; color:var(--primary); text-transform:uppercase;">Configurações:</div>` + configHtml.join('');
+                    configBox.style.display = 'block';
+                }
+
+                // 3. Preenche o Histórico
                 const histContainer = document.getElementById('resHist');
                 if (data.h && data.h.length > 0) {
                     histContainer.innerHTML = data.h.map(item => `<div class="hist-item">${item}</div>`).join('');
@@ -79,7 +103,6 @@
                     histContainer.innerHTML = `<div style="opacity:0.5; font-size:0.8rem; text-align:center;">Sem histórico</div>`;
                 }
 
-                // Mostra a caixa
                 document.getElementById('resultadoBox').style.display = 'block';
             } catch (e) {
                 document.body.innerHTML = "<h3 style='text-align:center;'>Link inválido ou corrompido.</h3>";
